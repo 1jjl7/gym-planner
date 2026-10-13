@@ -1,0 +1,97 @@
+# 🏋️ Gym Planner — خطتي التدريبية
+
+A bilingual (Arabic / English) workout planner and tracker that runs entirely in the browser: pick a training split, see how to do each exercise, log your sets, set goals, and follow your progress — no account, no server.
+
+**Live demo:** _coming soon (GitHub Pages)_
+
+![Gym Planner — Today tab](screenshots/desktop.png)
+
+## Features
+
+- **Training plans** — Push / Pull / Legs / Upper / Lower (my own split), Full Body 3×, and Bro Split, each as a repeating 7-day cycle.
+- **Today view** — works out which day of the cycle today is from a start date; a "missed today, push one day" button shifts the schedule.
+- **Exercise choices** — 31 movements with 85 equipment variants (barbell, dumbbell, cable, machine, Smith…). Change the equipment or swap to another exercise for the same muscle; choices are remembered.
+- **Technique window** — a 2-frame animation of the movement, a front/back body map that highlights the target muscle (strong) and helper muscles (light), short technique tips, and an embedded YouTube tutorial for every exercise in my plan (search button for the rest).
+- **Set logging** — weight and reps with − / + buttons, ✓ per set, auto-filled from the last time you did the same exercise with the same equipment.
+- **History** — every workout by date, editable; two-tap delete.
+- **Goals** — lift a target weight, reach a body weight, or train N times a week. Progress is computed from the log, measured from the starting point; input is checked against realistic ranges.
+- **Profile advice** — from age, height, sex and weight: BMI (with its limits explained), estimated daily calories, protein and water, a tip for your age, and whether a body-weight goal's deadline is a safe pace.
+- **Progress** — summary tiles, top-weight-per-workout chart with estimated one-rep max (Epley), a 6-month attendance heatmap (attended / missed / off days) with a monthly table, and a body-weight chart.
+- **Your data** — save a backup file, restore it on another device, or download your log as a CSV table for Excel / pandas.
+- **Installable app (PWA)** — add it to your home screen; it opens offline and keeps your plan's exercise images.
+
+## Tech stack
+
+- HTML, CSS, vanilla JavaScript (no framework, no build step)
+- [Chart.js 4.4.1](https://www.chartjs.org/) for charts
+- `localStorage` for all data
+- Service Worker + Web App Manifest for offline / install
+- Python (Pillow) to draw the app icons; a small Python script to build the exercise list from the open dataset
+
+## How it works
+
+- **Data files** (`data/`) describe *what* exists: movements and their equipment variants, the plans, and the video ids. The code in `js/` only reads them, so adding an exercise or a plan doesn't need code changes.
+- **The cycle**: `day of cycle = (days since start date) mod 7`, with a fix so dates before the start never give a negative number.
+- **User choices are stored separately** from the plan template (`"ppl_ul|0|2" → { movement, equip }`), so "back to original" is one click and the template stays untouched.
+- **The log** is keyed by date, and inside each day by `movement.equipment` — 25 kg on dumbbells is not 25 kg on a barbell. "Last time" = the most recent earlier date that has the same key.
+- **Derived values are never stored**: goal progress, attendance, BMI and charts are recalculated from the log every time, so editing or deleting a workout fixes everything automatically.
+- **Attendance**: a past training day with nothing logged counts as missed; rest days are never counted; today isn't counted until it's over. Commitment = attended training days ÷ (attended + missed).
+- **Offline**: the service worker uses *network-first* for the app's own files (updates arrive immediately) and *cache-first* for images, fonts and the chart library (they never change).
+
+## Project structure
+
+```
+gym-planner/
+├── index.html              # page skeleton: 5 tabs + exercise dialog
+├── manifest.webmanifest    # app name, icons, colors (PWA)
+├── sw.js                   # service worker (offline cache)
+├── css/style.css           # dark theme, RTL/LTR layout
+├── data/
+│   ├── exercises.js        # MUSCLES, EQUIPMENT, MOVEMENTS (+ variants)
+│   ├── splits.js           # the 3 training plans
+│   └── videos.js           # YouTube video ids per movement
+├── js/
+│   ├── i18n.js             # Arabic / English texts + language switch
+│   ├── bodymap.js          # SVG muscle map
+│   ├── log.js              # set logging + history
+│   ├── goals.js            # goals + body weight
+│   ├── profile.js          # profile + personal advice
+│   ├── charts.js           # Progress tab (tiles + Chart.js)
+│   ├── calendar.js         # attendance heatmap + monthly summary
+│   ├── backup.js           # backup / restore / CSV export
+│   ├── app.js              # tabs, plan, today, exercise dialog
+│   └── pwa.js              # service worker registration + install button
+├── icons/                  # app icons (192, 512, maskable, favicon)
+└── screenshots/
+```
+
+## Run locally
+
+```bash
+cd gym-planner
+python -m http.server 5501
+```
+
+Then open http://localhost:5501. A local server is needed (not double-clicking `index.html`) because the service worker only runs on `http://localhost` or `https://`.
+
+## Limitations (honest notes)
+
+- **Data stays on one device/browser.** There's no account or sync; use "Save a copy of my data" to move it.
+- **Internet is needed the first time** (exercise images, chart library, fonts) and always for YouTube videos.
+- **Off days in the attendance map come from the current plan.** If you switch plans, past months are shown against the new plan.
+- **Sets, reps and tips are general guidance** I wrote for my own training, not advice from a coach. Calories, BMI and protein use standard formulas and are estimates, not medical advice.
+- 22 of the 31 movements have a hand-picked video; the other 9 open a YouTube search instead.
+- No automated tests — features were checked manually in the browser (including offline with the server stopped).
+
+## Credits
+
+- Exercise images and muscle data: [free-exercise-db](https://github.com/yuhonas/free-exercise-db) (public domain / Unlicense)
+- Technique videos: [ScottHermanFitness](https://www.youtube.com/@ScottHermanFitness) on YouTube (embedded, not re-hosted)
+- Charts: [Chart.js](https://www.chartjs.org/) (MIT) · Font: [Cairo](https://fonts.google.com/specimen/Cairo) (OFL)
+
+## Author
+
+**Ahmed Maher Algaoni** — Computer Science student at Qassim University, aspiring Data Analyst.
+GitHub: [@1jjl7](https://github.com/1jjl7) · Portfolio: [1jjl7.github.io](https://1jjl7.github.io)
+
+Built step by step with [Claude Code](https://claude.com/claude-code) as a learning project.

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gym Planner</title>
+  <meta name="theme-color" content="#0f1115">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" href="icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">🏋️ <span data-i18n="appName">خطتي التدريبية</span></div>
+    <div class="top-actions">
+      <button id="installBtn" class="lang-btn install-btn" data-i18n="installApp" hidden>📱 ثبّت التطبيق</button>
+      <button id="langToggle" class="lang-btn" aria-label="Switch language">EN</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-tab="today" data-i18n="tabToday">اليوم</button>
+    <button class="tab" data-tab="plan" data-i18n="tabPlan">الخطة</button>
+    <button class="tab" data-tab="log" data-i18n="tabLog">السجل</button>
+    <button class="tab" data-tab="goals" data-i18n="tabGoals">الأهداف</button>
+    <button class="tab" data-tab="progress" data-i18n="tabProgress">التقدم</button>
+  </nav>
+
+  <main>
+    <section id="today" class="panel active">
+      <div class="today-hero">
+        <p id="todayDate" class="muted"></p>
+        <h2 id="todayTitle"></h2>
+        <p id="todayCycleInfo" class="muted small"></p>
+      </div>
+
+      <button id="monthSummary" class="month-summary"></button>
+
+      <div id="todayExercises" class="exercise-list"></div>
+
+      <h3 class="section-title" data-i18n="nextDays">الأيام الجاية</h3>
+      <div id="weekAhead" class="day-strip"></div>
+
+      <details class="schedule-settings">
+        <summary data-i18n="scheduleSettings">⚙️ ضبط الجدول</summary>
+        <label class="field">
+          <span data-i18n="startDateLabel">تاريخ بداية الخطة (اليوم 1)</span>
+          <input type="date" id="startDateInput">
+        </label>
+        <div class="settings-actions">
+          <button id="postponeBtn" class="secondary-btn" data-i18n="postpone">⏭ ما تمرنت اليوم — أجّل الجدول يوم</button>
+          <button id="startTodayBtn" class="secondary-btn" data-i18n="startToday">↺ خلّ اليوم هو اليوم 1</button>
+        </div>
+      </details>
+    </section>
+    <section id="plan" class="panel">
+      <h2 data-i18n="chooseSplit">اختر خطتك</h2>
+      <div id="splitChoices" class="split-choices"></div>
+
+      <h3 class="section-title" data-i18n="weekCycle">دورة الأسبوع</h3>
+      <div id="dayStrip" class="day-strip"></div>
+
+      <div id="dayExercises" class="exercise-list"></div>
+    </section>
+    <section id="log" class="panel">
+      <h2 data-i18n="historyTitle">حصصك السابقة</h2>
+      <div id="historyList" class="history-list"></div>
+
+      <h3 class="section-title" data-i18n="myData">💾 بياناتي</h3>
+      <div class="data-box">
+        <p class="muted small" data-i18n="dataExplain">بياناتك محفوظة في هذا الجهاز بس. لو غيّرت جوالك أو مسحت المتصفح بتضيع، فاحفظ نسخة كل فترة وحطها في Google Drive.</p>
+        <div class="settings-actions">
+          <button id="exportJson" class="secondary-btn" data-i18n="exportJson">💾 احفظ نسخة من بياناتي</button>
+          <label class="secondary-btn file-btn">
+            <span data-i18n="importJson">📂 رجّع بياناتي من ملف</span>
+            <input type="file" id="importFile" accept=".json,application/json" hidden>
+          </label>
+          <button id="exportCsv" class="secondary-btn" data-i18n="exportCsv">📊 نزّل سجلي كجدول Excel</button>
+        </div>
+        <p id="dataMessage"></p>
+        <button id="restoreConfirm" class="primary-btn" data-i18n="restoreConfirm" hidden>استبدل بياناتي بهذي النسخة</button>
+      </div>
+    </section>
+    <section id="goals" class="panel">
+      <h2 data-i18n="profileTitle">👤 ملفي</h2>
+      <form id="profileForm" class="profile-form" novalidate>
+        <label class="field">
+          <span data-i18n="ageLabel">العمر</span>
+          <input type="number" id="profileAge" inputmode="numeric" min="13" max="100">
+        </label>
+        <label class="field">
+          <span data-i18n="heightLabel">الطول (سم)</span>
+          <input type="number" id="profileHeight" inputmode="numeric" min="120" max="230">
+        </label>
+        <label class="field">
+          <span data-i18n="sexLabel">الجنس</span>
+          <select id="profileSex">
+            <option value="" data-i18n="choose">— اختر —</option>
+            <option value="male" data-i18n="male">ذكر</option>
+            <option value="female" data-i18n="female">أنثى</option>
+          </select>
+        </label>
+        <button type="submit" class="primary-btn" data-i18n="saveProfile">احفظ</button>
+      </form>
+      <p id="profileError" class="form-error"></p>
+      <div id="adviceCards" class="advice-list"></div>
+
+      <h2 class="section-title big" data-i18n="tabGoals">الأهداف</h2>
+      <div id="goalsList" class="goals-list"></div>
+
+      <details id="newGoalBox" class="schedule-settings">
+        <summary data-i18n="newGoal">+ هدف جديد</summary>
+        <form id="goalForm" class="goal-form" novalidate>
+          <label class="field">
+            <span data-i18n="goalType">نوع الهدف</span>
+            <select id="goalType">
+              <option value="lift" data-i18n="goalTypeLift">🏋️ وزن في تمرين</option>
+              <option value="bodyweight" data-i18n="goalTypeBody">⚖️ وزن الجسم</option>
+              <option value="frequency" data-i18n="goalTypeFreq">📅 عدد الحصص بالأسبوع</option>
+            </select>
+          </label>
+          <label class="field" data-goal-field="lift">
+            <span data-i18n="exercise">التمرين</span>
+            <select id="goalMovement"></select>
+          </label>
+          <label class="field" data-goal-field="lift">
+            <span data-i18n="equipment">الأداة</span>
+            <select id="goalEquip"></select>
+          </label>
+          <label class="field" data-goal-field="bodyweight">
+            <span data-i18n="currentWeightLabel">وزنك الحالي (كجم)</span>
+            <input type="number" id="goalCurrentWeight" inputmode="decimal" step="any" min="30" max="300">
+          </label>
+          <label class="field">
+            <span data-i18n="targetLabel">الهدف (رقم)</span>
+            <input type="number" id="goalTarget" inputmode="decimal" step="any" min="0">
+          </label>
+          <p id="goalHint" class="muted small"></p>
+          <label class="field">
+            <span data-i18n="deadlineLabel">موعد الهدف (اختياري)</span>
+            <input type="date" id="goalDeadline">
+          </label>
+          <button type="submit" class="primary-btn" data-i18n="addGoal">أضف الهدف</button>
+        </form>
+      </details>
+
+      <h3 class="section-title" data-i18n="bodyWeightTitle">⚖️ وزن الجسم</h3>
+      <div class="body-weight-box">
+        <div class="bw-entry">
+          <input type="number" id="bodyWeightInput" inputmode="decimal" step="any" min="30" max="300" placeholder="80.0">
+          <span class="muted" data-i18n="kg">كجم</span>
+          <button id="saveBodyWeight" class="primary-btn" data-i18n="saveToday">سجّل وزن اليوم</button>
+        </div>
+        <p id="bwError" class="form-error"></p>
+        <div id="bodyWeightHistory" class="legend"></div>
+      </div>
+    </section>
+    <section id="progress" class="panel">
+      <h2 data-i18n="tabProgress">التقدم</h2>
+      <div id="progressContent">
+        <div id="statTiles" class="stat-tiles"></div>
+
+        <div class="chart-card">
+          <div class="chart-head">
+            <h3 data-i18n="exerciseProgress">تطور التمرين (أعلى وزن بكل حصة، كجم)</h3>
+            <select id="progressExercise"></select>
+          </div>
+          <div class="chart-box"><canvas id="exerciseChart" aria-label="Exercise progress chart" role="img"></canvas></div>
+          <details class="table-toggle">
+            <summary data-i18n="showTable">عرض كجدول</summary>
+            <div id="exerciseTable"></div>
+          </details>
+        </div>
+
+        <div class="chart-card" id="attendanceSection">
+          <h3 data-i18n="attendanceTitle">الحضور (آخر 6 أشهر)</h3>
+          <div id="calendarCard" class="calendar-body"></div>
+        </div>
+
+        <div class="chart-card">
+          <h3 data-i18n="bodyWeightChartTitle">وزن الجسم (كجم)</h3>
+          <div class="chart-box"><canvas id="bodyWeightChart" aria-label="Body weight chart" role="img"></canvas></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Exercise details window (filled by JavaScript) -->
+  <dialog id="exerciseDialog" class="exercise-dialog">
+    <button class="close-btn" id="closeDialog" aria-label="Close">✕</button>
+    <div id="dialogContent"></div>
+  </dialog>
+
+  <script src="data/exercises.js"></script>
+  <script src="data/splits.js"></script>
+  <script src="data/videos.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/bodymap.js"></script>
+  <script src="js/log.js"></script>
+  <script src="js/goals.js"></script>
+  <script src="js/profile.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/backup.js"></script>
+  <script src="js/calendar.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/pwa.js"></script>
+</body>
+</html>
