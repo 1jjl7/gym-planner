@@ -6,9 +6,9 @@
 //  - Libraries, fonts, exercise images:     CACHE FIRST   → they never change, so the cached copy is enough
 //  - YouTube videos are NOT cached (too big; they need internet)
 
-const VERSION = "v2"; // change this whenever the file list changes
+const VERSION = "v11"; // change this whenever the file list changes
 const APP_CACHE = "app-" + VERSION;
-const STATIC_CACHE = "static-" + VERSION; // images / libraries / fonts
+const STATIC_CACHE = "static-v1"; // images / libraries / fonts — they never change, so this name stays fixed
 
 // Files needed for the app to open offline
 const APP_FILES = [
@@ -19,6 +19,7 @@ const APP_FILES = [
   "data/exercises.js",
   "data/splits.js",
   "data/videos.js",
+  "data/body-model.js",
   "js/i18n.js",
   "js/bodymap.js",
   "js/log.js",
@@ -27,6 +28,12 @@ const APP_FILES = [
   "js/charts.js",
   "js/backup.js",
   "js/calendar.js",
+  "js/timer.js",
+  "js/plates.js",
+  "js/warmup.js",
+  "js/records.js",
+  "js/volume.js",
+  "js/editor.js",
   "js/app.js",
   "js/pwa.js",
   "icons/icon-192.png",
@@ -77,7 +84,9 @@ self.addEventListener("fetch", (event) => {
 async function networkFirst(req) {
   const cache = await caches.open(APP_CACHE);
   try {
-    const res = await fetch(req);
+    // "no-cache" = always ask the server if the file changed (cheap 304 if not).
+    // Without it the browser's own HTTP cache can hand back an OLD file after an update.
+    const res = await fetch(req, { cache: "no-cache" });
     if (res.ok) cache.put(req, res.clone());
     return res;
   } catch {

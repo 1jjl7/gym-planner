@@ -1,6 +1,7 @@
 // ===== Saved state =====
 // Which split the user chose (remembered in the browser), and which day is open in the Plan tab
 let currentSplit = localStorage.getItem("split") || DEFAULT_SPLIT;
+if (!SPLITS[currentSplit]) currentSplit = DEFAULT_SPLIT; // e.g. a custom plan that was deleted
 let selectedDay = 0;
 
 // ===== Tab navigation =====
@@ -38,12 +39,14 @@ function renderSplitChoices() {
     card.innerHTML = `
       <strong>${split.name[currentLang]}</strong>
       <span class="muted">${trainingDays} ${t("trainingDays")}</span>
+      ${isCustomSplit(key) ? `<span class="muted small">✏️ ${t("customBadge")}</span>` : ""}
       ${key === currentSplit ? `<span class="badge">${t("selected")}</span>` : ""}
     `;
     card.addEventListener("click", () => {
       currentSplit = key;
       localStorage.setItem("split", key);
       selectedDay = 0;
+      editMode = false;
       refreshAll();
     });
     box.appendChild(card);
@@ -153,6 +156,7 @@ function renderExerciseList(list, dayIndex, withLog = false) {
 
     const card = document.createElement("div");
     card.className = "exercise-card";
+    card.dataset.slot = slotIndex; // lets the set panel tell two slots of the same exercise apart
     card.innerHTML = `
       <div class="exercise-main">
         <img src="${exerciseImage(variant.id, 0)}" alt="${move.name.en}" loading="lazy">
@@ -219,7 +223,11 @@ function renderExerciseList(list, dayIndex, withLog = false) {
 function renderPlan() {
   renderSplitChoices();
   renderDayStrip();
-  renderExerciseList(document.getElementById("dayExercises"), selectedDay);
+  const editBtn = document.getElementById("editPlanBtn");
+  editBtn.textContent = editMode ? "✓ " + t("doneEditingPlan") : "✏️ " + t("editPlan");
+  editBtn.classList.toggle("active", editMode);
+  if (editMode) renderEditor(document.getElementById("dayExercises"), selectedDay);
+  else renderExerciseList(document.getElementById("dayExercises"), selectedDay);
 }
 
 // ===== Today tab =====
@@ -290,6 +298,8 @@ function renderToday() {
   renderExerciseList(document.getElementById("todayExercises"), dayIndex, true);
 
   renderMonthSummary();
+  document.getElementById("restSecondsInput").value = restSeconds();
+  document.getElementById("barWeightInput").value = barWeightFor("barbell");
 }
 
 function setStartDate(text) {
@@ -360,6 +370,8 @@ function openExercise(movementKey, equip) {
     </div>
     <h3>${t("tipsTitle")}</h3>
     <ol class="tips">${move.tips[currentLang].map((tip) => `<li>${tip}</li>`).join("")}</ol>
+    <h3>🏆 ${t("prListTitle")}</h3>
+    ${recordsHtml(movementKey + "." + equip)}
     <h3>${t("videoTitle")}</h3>
     ${videoHtml}
   `;
@@ -400,6 +412,11 @@ document.getElementById("langToggle").addEventListener("click", () => {
 
 // Restore needs a second tap to confirm (it replaces everything)
 confirmClick(document.getElementById("restoreConfirm"), applyBackup);
+
+document.getElementById("editPlanBtn").addEventListener("click", () => {
+  if (editMode) stopEditing();
+  else startEditing();
+});
 
 // ===== Start =====
 applyLanguage();

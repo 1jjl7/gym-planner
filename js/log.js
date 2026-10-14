@@ -103,6 +103,11 @@ function renderSetPanel(container, dateKey, slot, dayInfo) {
   }
 
   const save = () => setSets(dateKey, key, sets, dayInfo);
+  const usesPlates = barWeightFor(slot.equip) !== null; // barbell / EZ bar → show the plate line
+  // warm-up box: only for today's big lifts (not when editing an old workout)
+  const isToday = dateKey === formatDateInput(todayDate());
+  const showWarmup = isToday && needsWarmup(slot.movement, slot.equip);
+  const warmupKey = key + "|" + container.closest(".exercise-card")?.dataset.slot;
   const doneCount = sets.filter((s) => s.done).length;
 
   container.innerHTML = `
@@ -112,6 +117,7 @@ function renderSetPanel(container, dateKey, slot, dayInfo) {
         : t("firstTime")}</span>
       <span class="done-count">${doneCount}/${sets.length}</span>
     </div>
+    ${showWarmup ? `<div class="warmup-holder">${warmupHtml(sets[0]?.w, slot, warmupKey)}</div>` : ""}
     <div class="set-rows">
       ${sets.map((s, i) => `
         <div class="set-row${s.done ? " done" : ""}" data-i="${i}">
@@ -129,6 +135,7 @@ function renderSetPanel(container, dateKey, slot, dayInfo) {
             <span class="unit">${t("repsShort")}</span>
           </div>
           <button class="check-btn" aria-label="done">✓</button>
+          ${usesPlates ? `<div class="plate-line">${plateText(s.w, slot.equip)}</div>` : ""}
         </div>`).join("")}
     </div>
     <div class="log-actions">
@@ -137,8 +144,30 @@ function renderSetPanel(container, dateKey, slot, dayInfo) {
     </div>
   `;
 
+  // remember open / closed state of the warm-up box
+  const watchWarmupToggle = () => {
+    const box = container.querySelector(".warmup");
+    if (!box) return;
+    box.addEventListener("toggle", () => {
+      if (box.open) openWarmups.add(warmupKey);
+      else openWarmups.delete(warmupKey);
+    });
+  };
+  watchWarmupToggle();
+
   container.querySelectorAll(".set-row").forEach((row) => {
     const i = Number(row.dataset.i);
+    // keep the plate line under this set in sync with its weight
+    const updatePlates = () => {
+      const line = row.querySelector(".plate-line");
+      if (line) line.innerHTML = plateText(sets[i].w, slot.equip);
+      // the warm-up is based on the FIRST set's weight
+      const holder = container.querySelector(".warmup-holder");
+      if (i === 0 && holder) {
+        holder.innerHTML = warmupHtml(sets[0].w, slot, warmupKey);
+        watchWarmupToggle();
+      }
+    };
 
     // − / + buttons: change the number, update the input, save if the set is already done
     row.querySelectorAll(".step").forEach((btn) => {
@@ -148,6 +177,7 @@ function renderSetPanel(container, dateKey, slot, dayInfo) {
         const value = clampSet(field, sets[i][field] + step * Number(btn.dataset.dir));
         sets[i][field] = Math.round(value * 100) / 100;
         row.querySelector(`input[data-field="${field}"]`).value = sets[i][field];
+        updatePlates();
         if (sets[i].done) save();
       });
     });
@@ -156,6 +186,7 @@ function renderSetPanel(container, dateKey, slot, dayInfo) {
     row.querySelectorAll("input").forEach((input) => {
       input.addEventListener("input", () => {
         sets[i][input.dataset.field] = clampSet(input.dataset.field, Number(input.value) || 0);
+        updatePlates();
         if (sets[i].done) save();
       });
       // when leaving the box, show the corrected number (e.g. 900 → 500)
@@ -169,6 +200,12 @@ function renderSetPanel(container, dateKey, slot, dayInfo) {
       sets[i].done = !sets[i].done;
       save();
       renderSetPanel(container, dateKey, slot, dayInfo);
+      // rest timer only for today's workout, and only when a set is ticked (not un-ticked)
+      if (sets[i].done && dateKey === formatDateInput(todayDate())) {
+        startRestTimer();
+        const record = checkNewRecord(key, dateKey, i);
+        if (record) showRecordToast(record);
+      }
     });
   });
 
@@ -206,7 +243,7 @@ function renderHistory() {
   dates.forEach((dateKey) => {
     const w = workouts[dateKey];
     const split = SPLITS[w.split];
-    const title = split ? split.days[w.dayIndex].title[currentLang] : "";
+    const title = split?.days[w.dayIndex]?.title[currentLang] ?? ""; // plan may have been edited / deleted
     const entries = Object.entries(w.logs).filter(([, sets]) => sets.some((s) => s.done));
 
     const card = document.createElement("div");

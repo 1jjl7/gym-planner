@@ -136,6 +136,9 @@ function renderProgress() {
     [tot.volume >= 1000 ? (tot.volume / 1000).toFixed(1) + " " + t("tons") : tot.volume + " " + t("kg"), t("statVolume")],
   ].map(([value, label]) => `<div class="stat-tile"><b dir="ltr">${value}</b><span class="muted small">${label}</span></div>`).join("");
 
+  // 1b) Weekly sets per muscle (volume.js)
+  renderVolume();
+
   // 2) Exercise progress
   const select = document.getElementById("progressExercise");
   const keys = loggedExercises();

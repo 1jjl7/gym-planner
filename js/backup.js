@@ -1,7 +1,7 @@
 // ===== My data: backup (JSON), restore, and CSV export for analysis =====
 
 // Every localStorage key the app uses
-const DATA_KEYS = ["workouts", "slotChoices", "goals", "bodyWeights", "profile", "split", "startDate", "lang", "trackingFrom"];
+const DATA_KEYS = ["workouts", "slotChoices", "goals", "bodyWeights", "profile", "split", "startDate", "lang", "trackingFrom", "restSeconds", "barWeight", "customSplits"];
 const BACKUP_APP = "gym-planner";
 const BACKUP_VERSION = 1;
 
@@ -121,7 +121,7 @@ function setsCsv() {
   for (const date of Object.keys(workouts).sort()) {
     const w = workouts[date];
     const split = SPLITS[w.split];
-    const dayName = split ? split.days[w.dayIndex].title.en : "";
+    const dayName = split?.days[w.dayIndex]?.title.en ?? "";
     for (const [key, sets] of Object.entries(w.logs)) {
       const [movement, equip] = key.split(".");
       const name = MOVEMENTS[movement] ? MOVEMENTS[movement].name.en : movement;

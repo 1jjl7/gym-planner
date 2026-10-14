@@ -4,7 +4,7 @@ One research pass over 10 apps: Strong, Hevy, JEFIT, Fitbod, Alpha Progression, 
 StrongLifts 5x5, Caliber, Gymshark Training, MacroFactor. Free/paid details come mostly from vendor
 pages and app-store listings — they change often; items marked *unverified* couldn't be confirmed.
 
-Status: **Not started — Ahmed is choosing which ones to build.**
+Status (2026-10-14): **Built #1 rest timer, #2 plate calculator, #3 warm-up calculator, #4 PR alerts + list, #6 weekly sets per muscle, #7 plan editor.** #5 next-weight suggestion was dropped by Ahmed. The rest are backlog.
 
 | # | Feature | Status | Offered by | Value | Effort |
 |---|---|---|---|---|---|

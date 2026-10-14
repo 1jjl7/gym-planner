@@ -9,14 +9,19 @@ A bilingual (Arabic / English) workout planner and tracker that runs entirely in
 ## Features
 
 - **Training plans** — Push / Pull / Legs / Upper / Lower (my own split), Full Body 3×, and Bro Split, each as a repeating 7-day cycle.
+- **Plan editor** — rename days, add / remove / reorder exercises, change sets, reps and equipment, or turn a day into a rest day. Editing a built-in plan makes your own copy, so the original is always one tap away.
 - **Today view** — works out which day of the cycle today is from a start date; a "missed today, push one day" button shifts the schedule.
 - **Exercise choices** — 31 movements with 85 equipment variants (barbell, dumbbell, cable, machine, Smith…). Change the equipment or swap to another exercise for the same muscle; choices are remembered.
-- **Technique window** — a 2-frame animation of the movement, a front/back body map that highlights the target muscle (strong) and helper muscles (light), short technique tips, and an embedded YouTube tutorial for every exercise in my plan (search button for the rest).
+- **Technique window** — a 2-frame animation of the movement, a front/back body map (polygon body model) that highlights the target muscle (strong) and helper muscles (light), short technique tips, and an embedded YouTube tutorial for every exercise in my plan (search button for the rest).
 - **Set logging** — weight and reps with − / + buttons, ✓ per set, auto-filled from the last time you did the same exercise with the same equipment.
+- **Rest timer** — starts when a set is ticked, with −15 / +15 / skip; vibrates and beeps when rest is over. The default length is a setting.
+- **Plate calculator** — under every barbell / EZ-bar set: which plates go on each side (e.g. 85 kg → 25 + 5 + 2.5), with a setting for the bar weight.
+- **Warm-up calculator** — for big lifts, suggested warm-up sets from your first set's weight (empty bar × 10 → 50% × 5 → 70% × 3 → 85% × 1), rounded to loadable weights, with plates.
+- **Personal records** — a gold banner when a ticked set beats your heaviest weight, your estimated one-rep max, or your reps at that weight; the technique window lists your records per exercise.
 - **History** — every workout by date, editable; two-tap delete.
 - **Goals** — lift a target weight, reach a body weight, or train N times a week. Progress is computed from the log, measured from the starting point; input is checked against realistic ranges.
 - **Profile advice** — from age, height, sex and weight: BMI (with its limits explained), estimated daily calories, protein and water, a tip for your age, and whether a body-weight goal's deadline is a safe pace.
-- **Progress** — summary tiles, top-weight-per-workout chart with estimated one-rep max (Epley), a 6-month attendance heatmap (attended / missed / off days) with a monthly table, and a body-weight chart.
+- **Progress** — summary tiles, weekly sets per muscle on the body map (low / good / high), top-weight-per-workout chart with estimated one-rep max (Epley), a 6-month attendance heatmap (attended / missed / off days) with a monthly table, and a body-weight chart.
 - **Your data** — save a backup file, restore it on another device, or download your log as a CSV table for Excel / pandas.
 - **Installable app (PWA)** — add it to your home screen; it opens offline and keeps your plan's exercise images.
 
@@ -36,7 +41,12 @@ A bilingual (Arabic / English) workout planner and tracker that runs entirely in
 - **The log** is keyed by date, and inside each day by `movement.equipment` — 25 kg on dumbbells is not 25 kg on a barbell. "Last time" = the most recent earlier date that has the same key.
 - **Derived values are never stored**: goal progress, attendance, BMI and charts are recalculated from the log every time, so editing or deleting a workout fixes everything automatically.
 - **Attendance**: a past training day with nothing logged counts as missed; rest days are never counted; today isn't counted until it's over. Commitment = attended training days ÷ (attended + missed).
-- **Offline**: the service worker uses *network-first* for the app's own files (updates arrive immediately) and *cache-first* for images, fonts and the chart library (they never change).
+- **Offline**: the service worker uses *network-first* (with `cache: "no-cache"`, so the browser's own HTTP cache can't serve an old file) for the app's own files and *cache-first* for images, fonts and the chart library (they never change).
+- **Rest timer** stores the *end time* instead of counting down, so it stays right even when the phone throttles a background page.
+- **Plate calculator** is a greedy algorithm (heaviest plate that fits, repeat). With standard plates each plate is a multiple of the next smaller one, so greedy gives the fewest plates.
+- **Records** are computed from the log on each ✓; the first time you ever do an exercise there's nothing to beat, so no banner.
+- **Weekly sets per muscle**: each finished set counts 1 for the exercise's main muscle and 0.5 for each helper muscle; 10–20 sets a week is shown as a general guideline.
+- **Plan editing is copy-on-write**: the built-in templates are never changed; your edited copy (with your swaps baked in) lives in `localStorage`.
 
 ## Project structure
 
@@ -49,7 +59,8 @@ gym-planner/
 ├── data/
 │   ├── exercises.js        # MUSCLES, EQUIPMENT, MOVEMENTS (+ variants)
 │   ├── splits.js           # the 3 training plans
-│   └── videos.js           # YouTube video ids per movement
+│   ├── videos.js           # YouTube video ids per movement
+│   └── body-model.js       # front/back body polygons (body-highlighter, MIT)
 ├── js/
 │   ├── i18n.js             # Arabic / English texts + language switch
 │   ├── bodymap.js          # SVG muscle map
@@ -59,8 +70,15 @@ gym-planner/
 │   ├── charts.js           # Progress tab (tiles + Chart.js)
 │   ├── calendar.js         # attendance heatmap + monthly summary
 │   ├── backup.js           # backup / restore / CSV export
+│   ├── timer.js            # rest timer
+│   ├── plates.js           # plate calculator
+│   ├── warmup.js           # warm-up calculator
+│   ├── records.js          # personal records
+│   ├── volume.js           # weekly sets per muscle
+│   ├── editor.js           # plan editor (custom plans)
 │   ├── app.js              # tabs, plan, today, exercise dialog
 │   └── pwa.js              # service worker registration + install button
+├── docs/feature-ideas.md   # competitor research and feature backlog
 ├── icons/                  # app icons (192, 512, maskable, favicon)
 └── screenshots/
 ```
@@ -81,12 +99,16 @@ Then open http://localhost:5501. A local server is needed (not double-clicking `
 - **Off days in the attendance map come from the current plan.** If you switch plans, past months are shown against the new plan.
 - **Sets, reps and tips are general guidance** I wrote for my own training, not advice from a coach. Calories, BMI and protein use standard formulas and are estimates, not medical advice.
 - 22 of the 31 movements have a hand-picked video; the other 9 open a YouTube search instead.
+- The rest timer can only vibrate / beep while the screen is on — browsers pause web pages on a locked phone.
+- No plate calculator for Smith machines, because their bar weight differs from gym to gym.
+- The body model has one "upper back" shape, so lats and middle back share it (it shows the larger value).
 - No automated tests — features were checked manually in the browser (including offline with the server stopped).
 
 ## Credits
 
 - Exercise images and muscle data: [free-exercise-db](https://github.com/yuhonas/free-exercise-db) (public domain / Unlicense)
 - Technique videos: [ScottHermanFitness](https://www.youtube.com/@ScottHermanFitness) on YouTube (embedded, not re-hosted)
+- Body / muscle map shapes: [body-highlighter](https://github.com/lahaxearnaud/body-highlighter) by GV79 (MIT)
 - Charts: [Chart.js](https://www.chartjs.org/) (MIT) · Font: [Cairo](https://fonts.google.com/specimen/Cairo) (OFL)
 
 ## Author
