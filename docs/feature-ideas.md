@@ -52,9 +52,23 @@ tomsguide.com Gymshark review, jefit.com blog.
 - Ties into the profile: "this meal = 35% of your daily protein".
 
 ### B. Usage dashboard (who uses it, who keeps using it)
-- Step 1: Vercel Web Analytics (visitors, no cookies).
+- Step 1: Vercel Web Analytics (visitors, no cookies). **Done 2026-10-14.** Note: page-based bounce rate is ~100% for a one-page app; real engagement needs custom events (Pro plan).
 - Step 2: anonymous events (random device id, no personal data): workout logged, feature used →
   DAU / WAU, retention after 1 / 4 weeks, most-used features.
 - Knowing users *by name* would need accounts + a backend and makes us responsible for personal data
   (Saudi PDPL). Prefer "how many", not "who"; tell users what is collected.
 - Analysis in pandas + a Power BI dashboard (retention cohorts, funnel) = a full Data Analyst portfolio project.
+
+### C. Health-data analysis project (Apple Health + this app)
+- Apple Health → Export All Health Data gives an XML file (steps, sleep, weight).
+- Join it with this app's CSV export in pandas → questions like "do I lift more after more sleep?" → Power BI dashboard.
+- Own real data, every claim verifiable — a good Data Analyst portfolio project.
+- Direct sync isn't possible from a PWA: Apple Health / Google Health Connect APIs are native-only.
+
+### D. Sign-in / health-app permissions (OAuth)
+- "Sign in with X" (OAuth) only works if the provider offers it to developers.
+- Sehhaty / Rashaqa: no public developer API as far as we know (*unverified* — check before building).
+- Nafath: identity only (not health data) and only for approved organisations.
+- Realistic option: "Sign in with Google" to sync workouts between devices — needs a backend + database
+  and makes us responsible for personal data (Saudi PDPL).
+- Meanwhile use Rashaqa for food and this app for training, side by side.
