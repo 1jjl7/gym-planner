@@ -2,7 +2,7 @@
 
 A bilingual (Arabic / English) workout planner and tracker that runs entirely in the browser: pick a training split, see how to do each exercise, log your sets, set goals, and follow your progress — no account, no server.
 
-**Live demo:** _coming soon (GitHub Pages)_
+**Live demo:** [khutati.vercel.app](https://khutati.vercel.app) — works on phones and can be installed as an app.
 
 ![Gym Planner — Today tab](screenshots/desktop.png)
 
