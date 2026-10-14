@@ -73,6 +73,7 @@ self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;
   const url = new URL(req.url);
+  if (url.pathname.startsWith("/_vercel/")) return; // analytics → always straight to the network, never cached
 
   if (url.origin === self.location.origin) {
     event.respondWith(networkFirst(req));
