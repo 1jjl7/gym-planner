@@ -42,10 +42,10 @@ function confirmClick(button, action) {
 }
 
 function loadWorkouts() {
-  return JSON.parse(localStorage.getItem("workouts") || "{}");
+  return JSON.parse(store.get("workouts") || "{}");
 }
 function saveWorkouts(workouts) {
-  localStorage.setItem("workouts", JSON.stringify(workouts));
+  store.set("workouts", JSON.stringify(workouts));
 }
 
 function logKey(movement, equip) {

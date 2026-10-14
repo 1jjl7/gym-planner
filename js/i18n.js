@@ -421,7 +421,7 @@ const TEXTS = {
 };
 
 // Current language: saved choice, or Arabic by default
-let currentLang = localStorage.getItem("lang") || "ar";
+let currentLang = store.get("lang") || "ar";
 
 // Get one text in the current language
 function t(key) {
@@ -441,6 +441,6 @@ function applyLanguage() {
 
 function toggleLanguage() {
   currentLang = currentLang === "ar" ? "en" : "ar";
-  localStorage.setItem("lang", currentLang);
+  store.set("lang", currentLang);
   applyLanguage();
 }

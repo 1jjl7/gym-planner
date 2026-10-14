@@ -5,10 +5,10 @@
 const PROFILE_LIMITS = { age: { min: 13, max: 100 }, height: { min: 120, max: 230 } };
 
 function loadProfile() {
-  return JSON.parse(localStorage.getItem("profile") || "null");
+  return JSON.parse(store.get("profile") || "null");
 }
 function saveProfile(profile) {
-  localStorage.setItem("profile", JSON.stringify(profile));
+  store.set("profile", JSON.stringify(profile));
 }
 
 // BMI = weight (kg) / height (m)²  — WHO categories

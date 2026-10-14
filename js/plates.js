@@ -9,7 +9,7 @@ const BAR_CHOICES = [20, 15, 10];              // olympic bar, women's bar, trai
 
 // Equipment that uses plates → which bar weight to use
 function barWeightFor(equip) {
-  if (equip === "barbell") return Number(localStorage.getItem("barWeight")) || 20;
+  if (equip === "barbell") return Number(store.get("barWeight")) || 20;
   if (equip === "ez") return EZ_BAR;
   return null; // dumbbell, cable, machine, smith (bar weight differs per gym) → no calculator
 }
@@ -48,6 +48,6 @@ function plateText(total, equip) {
 // Bar weight setting (⚙️ schedule settings)
 document.getElementById("barWeightInput").addEventListener("change", (e) => {
   const value = Number(e.target.value);
-  if (BAR_CHOICES.includes(value)) localStorage.setItem("barWeight", value);
+  if (BAR_CHOICES.includes(value)) store.set("barWeight", value);
   renderToday(); // refresh the plate lines
 });

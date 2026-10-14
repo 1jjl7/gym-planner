@@ -10,7 +10,7 @@ let restTick = null;     // interval that redraws the bar
 let restDoneTimer = null;
 
 function restSeconds() {
-  const saved = Number(localStorage.getItem("restSeconds"));
+  const saved = Number(store.get("restSeconds"));
   return saved >= REST_LIMITS.min && saved <= REST_LIMITS.max ? saved : 90;
 }
 
@@ -89,6 +89,6 @@ document.getElementById("restSkip").addEventListener("click", stopRestTimer);
 // Default rest setting (⚙️ schedule settings)
 document.getElementById("restSecondsInput").addEventListener("change", (e) => {
   const value = Math.round(Number(e.target.value));
-  if (value >= REST_LIMITS.min && value <= REST_LIMITS.max) localStorage.setItem("restSeconds", value);
+  if (value >= REST_LIMITS.min && value <= REST_LIMITS.max) store.set("restSeconds", value);
   e.target.value = restSeconds(); // shows the real value (fixes typos like 5 or 999)
 });

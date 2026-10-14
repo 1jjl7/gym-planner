@@ -62,6 +62,7 @@ gym-planner/
 │   ├── videos.js           # YouTube video ids per movement
 │   └── body-model.js       # front/back body polygons (body-highlighter, MIT)
 ├── js/
+│   ├── storage.js          # localStorage with a "gp_" prefix (+ moves old keys)
 │   ├── i18n.js             # Arabic / English texts + language switch
 │   ├── bodymap.js          # SVG muscle map
 │   ├── log.js              # set logging + history

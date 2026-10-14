@@ -8,12 +8,12 @@ const BUILT_IN_SPLITS = Object.keys(SPLITS);
 let editMode = false;
 
 function loadCustomSplits() {
-  return JSON.parse(localStorage.getItem("customSplits") || "{}");
+  return JSON.parse(store.get("customSplits") || "{}");
 }
 function saveCustomSplits() {
   const custom = {};
   for (const id of Object.keys(SPLITS)) if (!BUILT_IN_SPLITS.includes(id)) custom[id] = SPLITS[id];
-  localStorage.setItem("customSplits", JSON.stringify(custom));
+  store.set("customSplits", JSON.stringify(custom));
 }
 // Merge saved custom plans in (runs once, before app.js reads SPLITS)
 Object.assign(SPLITS, loadCustomSplits());
@@ -50,13 +50,13 @@ function bakeChoices(id) {
     });
   });
   for (const key of Object.keys(slotChoices)) if (key.startsWith(id + "|")) delete slotChoices[key];
-  localStorage.setItem("slotChoices", JSON.stringify(slotChoices));
+  store.set("slotChoices", JSON.stringify(slotChoices));
 }
 
 function startEditing() {
   if (!isCustomSplit(currentSplit)) {
     currentSplit = copyToCustom(currentSplit);
-    localStorage.setItem("split", currentSplit);
+    store.set("split", currentSplit);
   }
   bakeChoices(currentSplit);
   saveCustomSplits();
@@ -75,7 +75,7 @@ function deleteCustomPlan() {
   delete SPLITS[currentSplit];
   saveCustomSplits();
   currentSplit = back;
-  localStorage.setItem("split", back);
+  store.set("split", back);
   editMode = false;
   selectedDay = 0;
   refreshAll();

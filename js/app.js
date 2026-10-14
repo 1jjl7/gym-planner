@@ -1,6 +1,6 @@
 // ===== Saved state =====
 // Which split the user chose (remembered in the browser), and which day is open in the Plan tab
-let currentSplit = localStorage.getItem("split") || DEFAULT_SPLIT;
+let currentSplit = store.get("split") || DEFAULT_SPLIT;
 if (!SPLITS[currentSplit]) currentSplit = DEFAULT_SPLIT; // e.g. a custom plan that was deleted
 let selectedDay = 0;
 
@@ -44,7 +44,7 @@ function renderSplitChoices() {
     `;
     card.addEventListener("click", () => {
       currentSplit = key;
-      localStorage.setItem("split", key);
+      store.set("split", key);
       selectedDay = 0;
       editMode = false;
       refreshAll();
@@ -73,7 +73,7 @@ function renderDayStrip() {
 // ===== Slot choices (equipment / swapped movement) =====
 // Saved as { "ppl_ul|0|2": { movement: "chest_fly", equip: "cable" }, ... }
 // key = split | day number | position of the exercise in that day
-let slotChoices = JSON.parse(localStorage.getItem("slotChoices") || "{}");
+let slotChoices = JSON.parse(store.get("slotChoices") || "{}");
 let openSwapKey = null; // which card has its "alternatives" list open
 
 function slotKey(dayIndex, slotIndex) {
@@ -96,12 +96,12 @@ function resolveSlot(dayIndex, slotIndex) {
 
 function saveSlot(dayIndex, slotIndex, movement, equip) {
   slotChoices[slotKey(dayIndex, slotIndex)] = { movement, equip };
-  localStorage.setItem("slotChoices", JSON.stringify(slotChoices));
+  store.set("slotChoices", JSON.stringify(slotChoices));
 }
 
 function resetSlot(dayIndex, slotIndex) {
   delete slotChoices[slotKey(dayIndex, slotIndex)];
-  localStorage.setItem("slotChoices", JSON.stringify(slotChoices));
+  store.set("slotChoices", JSON.stringify(slotChoices));
 }
 
 // Main muscle of a movement = primary muscle of its first variant
@@ -251,9 +251,9 @@ function formatDateInput(date) {
 }
 
 // Start date saved in the browser; first time = today (so today is Day 1)
-let startDate = localStorage.getItem("startDate") || formatDateInput(todayDate());
+let startDate = store.get("startDate") || formatDateInput(todayDate());
 // First day the calendar counts from. Saved once; postponing later doesn't move it.
-if (!localStorage.getItem("trackingFrom")) localStorage.setItem("trackingFrom", startDate);
+if (!store.get("trackingFrom")) store.set("trackingFrom", startDate);
 
 // Which day of the cycle a given date falls on (0 = Day 1)
 function cycleDayFor(date) {
@@ -304,7 +304,7 @@ function renderToday() {
 
 function setStartDate(text) {
   startDate = text;
-  localStorage.setItem("startDate", text);
+  store.set("startDate", text);
   renderToday();
 }
 

@@ -1,7 +1,7 @@
 // ===== My data: backup (JSON), restore, and CSV export for analysis =====
 
-// Every localStorage key the app uses
-const DATA_KEYS = ["workouts", "slotChoices", "goals", "bodyWeights", "profile", "split", "startDate", "lang", "trackingFrom", "restSeconds", "barWeight", "customSplits"];
+// Every key the app uses (the list lives in storage.js; backups keep the names without the "gp_" prefix)
+const DATA_KEYS = STORE_KEYS;
 const BACKUP_APP = "gym-planner";
 const BACKUP_VERSION = 1;
 
@@ -28,7 +28,7 @@ function setDataMessage(text, isError = false) {
 function buildBackup() {
   const data = {};
   for (const key of DATA_KEYS) {
-    const raw = localStorage.getItem(key);
+    const raw = store.get(key);
     if (raw === null) continue;
     // values saved as JSON are stored as objects, plain strings (like "ppl_ul") stay strings
     try { data[key] = JSON.parse(raw); } catch { data[key] = raw; }
@@ -95,10 +95,10 @@ document.getElementById("importFile").addEventListener("change", async (e) => {
 
 function applyBackup() {
   if (!pendingBackup) return;
-  for (const key of DATA_KEYS) localStorage.removeItem(key);
+  for (const key of DATA_KEYS) store.remove(key);
   for (const [key, value] of Object.entries(pendingBackup.data)) {
     if (!DATA_KEYS.includes(key)) continue; // ignore anything we don't know
-    localStorage.setItem(key, typeof value === "string" ? value : JSON.stringify(value));
+    store.set(key, typeof value === "string" ? value : JSON.stringify(value));
   }
   pendingBackup = null;
   location.reload(); // start fresh with the restored data

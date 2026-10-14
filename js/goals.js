@@ -18,16 +18,16 @@ function rangeError(limits) {
 }
 
 function loadGoals() {
-  return JSON.parse(localStorage.getItem("goals") || "[]");
+  return JSON.parse(store.get("goals") || "[]");
 }
 function saveGoals(goals) {
-  localStorage.setItem("goals", JSON.stringify(goals));
+  store.set("goals", JSON.stringify(goals));
 }
 function loadBodyWeights() {
-  return JSON.parse(localStorage.getItem("bodyWeights") || "{}");
+  return JSON.parse(store.get("bodyWeights") || "{}");
 }
 function saveBodyWeights(data) {
-  localStorage.setItem("bodyWeights", JSON.stringify(data));
+  store.set("bodyWeights", JSON.stringify(data));
 }
 
 // Heaviest finished set ever for one exercise (0 if never done)

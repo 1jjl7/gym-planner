@@ -13,7 +13,7 @@ let heatScrollPos = null; // where the user scrolled the map to (kept when the m
 
 // The first day we count from: the day you started using the plan (kept even if you postpone later)
 function trackingStart() {
-  let from = localStorage.getItem("trackingFrom") || startDate;
+  let from = store.get("trackingFrom") || startDate;
   const firstWorkout = Object.keys(loadWorkouts()).sort()[0];
   if (firstWorkout && firstWorkout < from) from = firstWorkout;
   return from;

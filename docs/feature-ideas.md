@@ -40,3 +40,21 @@ ranks them high, so it's his call.
 Sources: hevyapp.com feature pages, boostcamp.app/pro, alphaprogression.com, macrofactor.com/workouts,
 fitbod.me blog + help, App Store listings (Strong, StrongLifts, Caliber, MacroFactor), sensai.fit reviews,
 tomsguide.com Gymshark review, jefit.com blog.
+
+## Bigger ideas for later (Ahmed, 2026-10-14)
+
+### A. Meal photo → calories & protein (AI)
+- Use an existing vision model (e.g. Claude) instead of training one — training needs deep learning,
+  a GPU and a large labelled dataset (e.g. Nutrition5k).
+- Needs a **backend**: the API key must never be in the website code. A Vercel Serverless Function can hold it.
+- Needs a **usage limit** (paid per request) and a **privacy notice** (photos go to a third party).
+- Be honest about accuracy: portion size from a photo is hard (±20–30%); let the user correct the amount.
+- Ties into the profile: "this meal = 35% of your daily protein".
+
+### B. Usage dashboard (who uses it, who keeps using it)
+- Step 1: Vercel Web Analytics (visitors, no cookies).
+- Step 2: anonymous events (random device id, no personal data): workout logged, feature used →
+  DAU / WAU, retention after 1 / 4 weeks, most-used features.
+- Knowing users *by name* would need accounts + a backend and makes us responsible for personal data
+  (Saudi PDPL). Prefer "how many", not "who"; tell users what is collected.
+- Analysis in pandas + a Power BI dashboard (retention cohorts, funnel) = a full Data Analyst portfolio project.
