@@ -6,7 +6,7 @@
 //  - Libraries, fonts, exercise images:     CACHE FIRST   → they never change, so the cached copy is enough
 //  - YouTube videos are NOT cached (too big; they need internet)
 
-const VERSION = "v13"; // change this whenever the file list changes
+const VERSION = "v14"; // change this whenever the file list changes
 const APP_CACHE = "app-" + VERSION;
 const STATIC_CACHE = "static-v1"; // images / libraries / fonts — they never change, so this name stays fixed
 
@@ -94,14 +94,20 @@ async function networkFirst(req) {
     return res;
   } catch {
     // offline: cached copy (ignore "?x=1" style query strings)
-    return (await cache.match(req, { ignoreSearch: true })) || (await cache.match("index.html"));
+    const cached = await cache.match(req, { ignoreSearch: true });
+    if (cached) return cached;
+    // Only a PAGE visit falls back to the app's start page. A missing .js / .css / image must fail
+    // as a normal error — getting HTML instead gives confusing "Unexpected token <" errors.
+    if (req.mode === "navigate") return cache.match("index.html");
+    return Response.error();
   }
 }
 
 async function cacheFirst(req) {
   const cache = await caches.open(STATIC_CACHE);
   const cached = await cache.match(req);
-  if (cached) return cached;
+  // A script checked with "integrity" needs a readable (CORS) copy; an old opaque copy would be refused
+  if (cached && !(cached.type === "opaque" && req.mode === "cors")) return cached;
   const res = await fetch(req);
   // "opaque" = cross-site response we can't read but can still store (e.g. images without CORS)
   if (res.ok || res.type === "opaque") cache.put(req, res.clone());

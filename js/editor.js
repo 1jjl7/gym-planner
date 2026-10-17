@@ -8,7 +8,7 @@ const BUILT_IN_SPLITS = Object.keys(SPLITS);
 let editMode = false;
 
 function loadCustomSplits() {
-  return JSON.parse(store.get("customSplits") || "{}");
+  return store.getJSON("customSplits", {});
 }
 function saveCustomSplits() {
   const custom = {};
@@ -136,11 +136,11 @@ function renderEditor(list, dayIndex) {
     <div class="editor">
       <label class="field">
         <span>${t("planNameLabel")}</span>
-        <input type="text" id="editPlanName" maxlength="40" value="${plan.name[currentLang]}">
+        <input type="text" id="editPlanName" maxlength="40" value="${esc(plan.name[currentLang])}">
       </label>
       <label class="field">
         <span>${t("dayNameLabel")} ${dayIndex + 1}</span>
-        <input type="text" id="editDayName" maxlength="20" value="${day.title[currentLang]}">
+        <input type="text" id="editDayName" maxlength="20" value="${esc(day.title[currentLang])}">
       </label>
       ${isRest ? `<p class="rest-msg">${t("restDay")}</p>` : `<div class="edit-list">${rows}</div>`}
       <div class="add-box">

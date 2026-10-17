@@ -5,7 +5,7 @@
 const PROFILE_LIMITS = { age: { min: 13, max: 100 }, height: { min: 120, max: 230 } };
 
 function loadProfile() {
-  return JSON.parse(store.get("profile") || "null");
+  return store.getJSON("profile", null);
 }
 function saveProfile(profile) {
   store.set("profile", JSON.stringify(profile));

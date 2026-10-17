@@ -42,7 +42,7 @@ function confirmClick(button, action) {
 }
 
 function loadWorkouts() {
-  return JSON.parse(store.get("workouts") || "{}");
+  return store.getJSON("workouts", {});
 }
 function saveWorkouts(workouts) {
   store.set("workouts", JSON.stringify(workouts));
@@ -82,7 +82,7 @@ function lastSession(key, dateKey) {
 
 // "25×10 · 25×9"
 function setsText(sets) {
-  return sets.map((s) => `${s.w}×${s.r}`).join(" · ");
+  return sets.map((s) => `${esc(s.w)}×${esc(s.r)}`).join(" · ");
 }
 
 // ----- The set rows (used in the Today tab and when editing an old workout) -----
@@ -128,13 +128,13 @@ function renderSetPanel(container, dateKey, slot, dayInfo) {
           <span class="set-num">${i + 1}</span>
           <div class="stepper">
             <button class="step" data-field="w" data-dir="-1" aria-label="-">−</button>
-            <input type="number" inputmode="decimal" step="0.5" min="0" max="500" data-field="w" value="${s.w}">
+            <input type="number" inputmode="decimal" step="0.5" min="0" max="500" data-field="w" value="${esc(s.w)}">
             <button class="step" data-field="w" data-dir="1" aria-label="+">+</button>
             <span class="unit">${t("kg")}</span>
           </div>
           <div class="stepper">
             <button class="step" data-field="r" data-dir="-1" aria-label="-">−</button>
-            <input type="number" inputmode="numeric" step="1" min="0" max="100" data-field="r" value="${s.r}">
+            <input type="number" inputmode="numeric" step="1" min="0" max="100" data-field="r" value="${esc(s.r)}">
             <button class="step" data-field="r" data-dir="1" aria-label="+">+</button>
             <span class="unit">${t("repsShort")}</span>
           </div>
@@ -255,7 +255,7 @@ function renderHistory() {
     card.innerHTML = `
       <div class="history-head">
         <div>
-          <b>${title}</b>
+          <b>${esc(title)}</b>
           <span class="muted small">${formatDate(parseDate(dateKey), { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</span>
         </div>
         <div class="card-actions">

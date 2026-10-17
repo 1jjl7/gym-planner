@@ -72,3 +72,56 @@ tomsguide.com Gymshark review, jefit.com blog.
 - Realistic option: "Sign in with Google" to sync workouts between devices — needs a backend + database
   and makes us responsible for personal data (Saudi PDPL).
 - Meanwhile use Rashaqa for food and this app for training, side by side.
+
+### E. Apple Health via Shortcuts (weekly or one tap) — planned 2026-10-17
+- A website can't read Apple Health (HealthKit / Core Motion are native-only). The bridge is Apple's
+  **Shortcuts** app, which can read Health data ("Find Health Samples").
+- Ahmed builds the shortcut ONCE on his iPhone and shares it as an **iCloud link**; the site gets an
+  "Connect Apple Health" button → user taps "Add Shortcut" (one tap, like the Outcap app).
+- The shortcut reads the last 7 days → opens `khutati.vercel.app/#health=...`. The part after `#` never
+  reaches the server, so health data stays on the phone. Site parses it and saves to localStorage.
+- Run by tapping (home-screen / widget) or a **weekly automation** (e.g. Sunday 9:00) — check on Ahmed's
+  phone whether it runs without asking.
+- Ask only for what's needed (least privilege): weight, sleep, steps; maybe active energy, resting HR
+  (*unverified* availability). No location.
+- Uses: auto-fill body weight (profile advice + weight goal), sleep vs training volume, steps on rest days,
+  weekly report in Progress, smart hints ("slept < 6 h three nights → go lighter").
+- Correlation ≠ causation; tiny sample (one person) → present as observations.
+- iPhone only. Claude can't control the iPhone → Ahmed does the steps and sends screenshots.
+- First test: shortcut sends today's steps only → site shows the number.
+
+### F. Meal photo with CLIP + SFDA tables (free, on-device) — planned 2026-10-17
+- **Food data:** SFDA "Saudi Food Composition Tables" (June 2026): 130 Saudi dishes, nutrients per 100 g.
+  https://www.sfda.gov.sa/en/news/19089 — TODO: read SFDA terms of use before copying values; open the
+  PDF (>10 MB) and confirm dish names (kabsa, jareesh, marqooq…).
+- **Model:** CLIP zero-shot (`Xenova/clip-vit-base-patch32`, Transformers.js) — give it a photo + list of
+  dish names, it ranks the closest. No training needed. TODO: confirm license and download size (~90–150 MB guess).
+- **Flow:** photo → CLIP suggests top 3 dishes → user confirms + picks portion (plate / half / grams) →
+  calories & protein from the SFDA table → % of daily protein from the profile.
+- **Cost:** free per use (runs on the phone); model files served by Hugging Face.
+- **Risks:** big first download (load only when the user enables it, show the size), slow on old phones,
+  similar dishes get mixed (kabsa / mandi / biryani), portion is manual, foods outside the table,
+  **iPhone Safari may crash on large models** (biggest risk), depends on Hugging Face hosting.
+- Add a notice: "estimates, not medical advice".
+- **vercel.json blocks the camera** (`Permissions-Policy: camera=()`) — change it to `camera=(self)` when building
+  this, and add the model host (huggingface.co / its CDN) to the CSP `connect-src`.
+- **First test:** separate test page, 5–10 real meal photos from Ahmed's phone → record accuracy, time,
+  whether the iPhone copes → then decide: keep A, switch to Claude API (B, paid, more accurate),
+  or a searchable dish list only (C).
+- Researched but not chosen: no ready Food-101 ONNX model found (would need training); MENA-150
+  (150 MENA dishes, license unknown); small Roboflow sets with kabsa (detection, license unclear).
+
+### G. Profile photo and name
+- Add a name and a photo to the existing profile (age / height / sex). Show them in the header ("Hi, Ahmed").
+- No accounts: every person's profile already lives on their own device — nothing to set up per user.
+- Photo: resize in the browser (canvas, ~256 px) before saving so localStorage (~5 MB) doesn't fill up;
+  include it in the backup file.
+- Sharing one profile across devices would need accounts + a backend (see D).
+
+## Security review follow-ups (2026-10-17)
+Done locally: 1) `esc()` on every user / backup text in innerHTML, 2) field-by-field backup validation,
+3) safe `store.getJSON` + "couldn't save" bar, 4) `vercel.json` CSP + security headers + SRI on Chart.js,
+5) offline fallback only for page visits.
+**Next (reminder for Ahmed): 6) automated tests** for pure functions (checkBackup, estimated1RM, plates,
+warm-up) — then the medium items: one in-memory cache instead of 22× loadWorkouts(), schema version,
+ES modules, generated APP_FILES list, aria labels / tab roles.

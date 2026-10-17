@@ -43,20 +43,77 @@ document.getElementById("exportJson").addEventListener("click", () => {
 });
 
 // ----- 2) Restore from a backup file -----
-// Checks the file really is our backup and the data has the right shape. Returns an error key or null.
+// A backup file can come from anywhere (a friend, a download), so EVERY field is checked before
+// anything is saved: right type, realistic range, and ids that really exist in the app.
+// Returns an error key, or null when the file is safe to restore.
+const isObj = (x) => x !== null && typeof x === "object" && !Array.isArray(x);
+const isNum = (x, min, max) => typeof x === "number" && Number.isFinite(x) && x >= min && x <= max;
+const isInt = (x, min, max) => Number.isInteger(x) && x >= min && x <= max;
+const isDateKey = (x) => typeof x === "string" && /^\d{4}-\d{2}-\d{2}$/.test(x);
+// names: 1..maxLength characters, and no "<" or ">" (a real plan / day name never needs them)
+const isText = (x, maxLength) => typeof x === "string" && x.length > 0 && x.length <= maxLength && !/[<>]/.test(x);
+// "__proto__" / "constructor" as a key could change how every object in the app behaves
+const safeKeys = (obj) => Object.keys(obj).every((k) => !["__proto__", "constructor", "prototype"].includes(k));
+const isMoveEquip = (movement, equip) => Boolean(MOVEMENTS[movement] && MOVEMENTS[movement].variants[equip]);
+
+function checkSets(sets) {
+  return Array.isArray(sets) && sets.length <= 30 && sets.every((s) =>
+    isObj(s) && isNum(s.w, 0, SET_LIMITS.w) && isInt(s.r, 0, SET_LIMITS.r) && typeof s.done === "boolean");
+}
+
+function checkWorkouts(workouts) {
+  if (!isObj(workouts) || !safeKeys(workouts)) return false;
+  return Object.entries(workouts).every(([date, day]) =>
+    isDateKey(date) && isObj(day) && isObj(day.logs) && safeKeys(day.logs) &&
+    (day.finished === undefined || typeof day.finished === "boolean") &&
+    Object.entries(day.logs).every(([key, sets]) => {
+      const [movement, equip] = key.split(".");
+      return isMoveEquip(movement, equip) && checkSets(sets);
+    }));
+}
+
+function checkGoals(goals) {
+  return Array.isArray(goals) && goals.length <= 100 && goals.every((g) => {
+    if (!isObj(g)) return false;
+    if (g.deadline !== undefined && g.deadline !== "" && !isDateKey(g.deadline)) return false;
+    if (g.type === "lift") return isMoveEquip(g.movement, g.equip) && isNum(g.target, 0, SET_LIMITS.w) && isNum(g.start, 0, SET_LIMITS.w);
+    if (g.type === "bodyweight") return isNum(g.target, LIMITS.bodyWeight.min, LIMITS.bodyWeight.max) && isNum(g.start, LIMITS.bodyWeight.min, LIMITS.bodyWeight.max);
+    if (g.type === "frequency") return isInt(g.target, LIMITS.perWeek.min, LIMITS.perWeek.max);
+    return false;
+  });
+}
+
+function checkCustomSplits(splits) {
+  if (!isObj(splits) || !safeKeys(splits)) return false;
+  return Object.entries(splits).every(([id, plan]) =>
+    /^custom_\d+$/.test(id) && isObj(plan) && isObj(plan.name) &&
+    isText(plan.name.ar, 40) && isText(plan.name.en, 40) &&
+    Array.isArray(plan.days) && plan.days.length === 7 &&
+    plan.days.every((day) => isObj(day) && isObj(day.title) && isText(day.title.ar, 20) && isText(day.title.en, 20) &&
+      Array.isArray(day.exercises) && day.exercises.length <= 15 &&
+      day.exercises.every((ex) => Array.isArray(ex) && isMoveEquip(ex[0], ex[3]) &&
+        isInt(ex[1], 1, 10) && typeof ex[2] === "string" && REPS_PATTERN.test(ex[2]))));
+}
+
 function checkBackup(backup) {
-  const isObj = (x) => x !== null && typeof x === "object" && !Array.isArray(x);
   if (!isObj(backup) || backup.app !== BACKUP_APP || !isObj(backup.data)) return "restoreNotOurs";
   const d = backup.data;
-  if (d.workouts !== undefined) {
-    if (!isObj(d.workouts)) return "restoreBroken";
-    for (const [date, day] of Object.entries(d.workouts)) {
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !isObj(day) || !isObj(day.logs)) return "restoreBroken";
-    }
-  }
-  if (d.goals !== undefined && !Array.isArray(d.goals)) return "restoreBroken";
-  if (d.bodyWeights !== undefined && !isObj(d.bodyWeights)) return "restoreBroken";
-  return null;
+  const ok = (key, test) => d[key] === undefined || test(d[key]);
+  const customIds = isObj(d.customSplits) ? Object.keys(d.customSplits) : [];
+  const valid =
+    ok("workouts", checkWorkouts) &&
+    ok("goals", checkGoals) &&
+    ok("customSplits", checkCustomSplits) &&
+    ok("bodyWeights", (x) => isObj(x) && safeKeys(x) && Object.entries(x).every(([k, v]) => isDateKey(k) && isNum(v, LIMITS.bodyWeight.min, LIMITS.bodyWeight.max))) &&
+    ok("slotChoices", (x) => isObj(x) && safeKeys(x) && Object.values(x).every((c) => isObj(c) && isMoveEquip(c.movement, c.equip))) &&
+    ok("profile", (x) => isObj(x) && isNum(x.age, PROFILE_LIMITS.age.min, PROFILE_LIMITS.age.max) && isNum(x.height, PROFILE_LIMITS.height.min, PROFILE_LIMITS.height.max) && ["male", "female"].includes(x.sex)) &&
+    ok("split", (x) => typeof x === "string" && (BUILT_IN_SPLITS.includes(x) || customIds.includes(x))) &&
+    ok("lang", (x) => x === "ar" || x === "en") &&
+    ok("startDate", isDateKey) &&
+    ok("trackingFrom", isDateKey) &&
+    ok("restSeconds", (x) => isInt(Number(x), REST_LIMITS.min, REST_LIMITS.max)) &&
+    ok("barWeight", (x) => BAR_CHOICES.includes(Number(x)));
+  return valid ? null : "restoreBroken";
 }
 
 let pendingBackup = null; // backup read from a file, waiting for the user's confirmation

@@ -37,7 +37,7 @@ function renderSplitChoices() {
     const card = document.createElement("button");
     card.className = "split-card" + (key === currentSplit ? " active" : "");
     card.innerHTML = `
-      <strong>${split.name[currentLang]}</strong>
+      <strong>${esc(split.name[currentLang])}</strong>
       <span class="muted">${trainingDays} ${t("trainingDays")}</span>
       ${isCustomSplit(key) ? `<span class="muted small">✏️ ${t("customBadge")}</span>` : ""}
       ${key === currentSplit ? `<span class="badge">${t("selected")}</span>` : ""}
@@ -61,7 +61,7 @@ function renderDayStrip() {
     const isRest = day.exercises.length === 0;
     const box = document.createElement("button");
     box.className = "day-box" + (isRest ? " rest" : "") + (i === selectedDay ? " active" : "");
-    box.innerHTML = `<small>${t("day")} ${i + 1}</small><b>${day.title[currentLang]}</b>`;
+    box.innerHTML = `<small>${t("day")} ${i + 1}</small><b>${esc(day.title[currentLang])}</b>`;
     box.addEventListener("click", () => {
       selectedDay = i;
       renderPlan();
@@ -73,7 +73,7 @@ function renderDayStrip() {
 // ===== Slot choices (equipment / swapped movement) =====
 // Saved as { "ppl_ul|0|2": { movement: "chest_fly", equip: "cable" }, ... }
 // key = split | day number | position of the exercise in that day
-let slotChoices = JSON.parse(store.get("slotChoices") || "{}");
+let slotChoices = store.getJSON("slotChoices", {});
 let openSwapKey = null; // which card has its "alternatives" list open
 
 function slotKey(dayIndex, slotIndex) {
@@ -297,7 +297,7 @@ function renderToday() {
     const box = document.createElement("div");
     box.className = "day-box" + (d.exercises.length === 0 ? " rest" : "") + (i === 0 ? " active" : "");
     box.innerHTML = `<small>${i === 0 ? t("todayWord") : formatDate(date, { weekday: "short" })}</small>
-                     <b>${d.title[currentLang]}</b>
+                     <b>${esc(d.title[currentLang])}</b>
                      <small>${formatDate(date, { day: "numeric", month: "numeric" })}</small>`;
     week.appendChild(box);
   }

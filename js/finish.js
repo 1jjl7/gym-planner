@@ -77,7 +77,7 @@ function renderFinishBox() {
     const s = daySummary(todayKey());
     const title = document.getElementById("todayTitle").textContent;
     const parts = [
-      t("finishedTitle").replace("{day}", title),
+      t("finishedTitle").replace("{day}", esc(title)),
       t("finishedSets").replace("{n}", s.sets),
       `<span dir="ltr">${s.volume.toLocaleString("en")}</span> ${t("kg")}`,
     ];

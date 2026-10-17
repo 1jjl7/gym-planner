@@ -1,5 +1,8 @@
 // ===== Installable app (PWA) =====
 
+// Vercel Web Analytics queue (must exist before /_vercel/insights/script.js loads at the end of the page)
+window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+
 // 1) Register the service worker (only works on https or localhost)
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {

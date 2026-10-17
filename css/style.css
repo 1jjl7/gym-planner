@@ -820,3 +820,15 @@ main { padding-bottom: 90px; }
 .exercise-card.collapsed .exercise-info p { display: none; }
 .exercise-card.collapsed .exercise-main img { width: 44px; height: 44px; }
 .exercise-card:not(.collapsed) .expand-btn { display: none; }
+
+/* "couldn't save" bar (storage full / blocked) */
+.storage-error {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--missed);
+  color: #fff;
+  padding: 10px 14px;
+  font-weight: 700;
+  text-align: center;
+}

@@ -29,6 +29,9 @@
     <button class="tab" data-tab="progress" data-i18n="tabProgress">التقدم</button>
   </nav>
 
+  <!-- shown by store.set() when the browser refuses to save (storage full / blocked) -->
+  <div id="storageError" class="storage-error" role="alert" hidden></div>
+
   <main>
     <section id="today" class="panel active">
       <div class="today-hero">
@@ -241,7 +244,9 @@
   <script src="js/log.js"></script>
   <script src="js/goals.js"></script>
   <script src="js/profile.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <!-- integrity = fingerprint of the exact file (from cdnjs): if the CDN copy is ever changed, the browser refuses to run it -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"
+          integrity="sha512-CQBWl4fJHWbryGE+Pc7UAxWMUMNMWzWxF4SQo9CgkJIN1kx6djDQZjh3Y8SZ1d+6I+1zze6Z7kHXO7q3UyZAWw==" crossorigin="anonymous"></script>
   <script src="js/charts.js"></script>
   <script src="js/backup.js"></script>
   <script src="js/calendar.js"></script>
@@ -255,11 +260,9 @@
   <script src="js/app.js"></script>
   <script src="js/pwa.js"></script>
 
-  <!-- Vercel Web Analytics: counts visits only (no cookies, no workout data).
+  <!-- Vercel Web Analytics: counts visits only (no cookies, no workout data). Its small setup line lives
+       in pwa.js (no inline scripts, so the security policy can block injected ones).
        The script exists only on the live Vercel site, so locally it is a harmless 404. -->
-  <script>
-    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-  </script>
   <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>

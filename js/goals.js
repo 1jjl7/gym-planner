@@ -18,13 +18,13 @@ function rangeError(limits) {
 }
 
 function loadGoals() {
-  return JSON.parse(store.get("goals") || "[]");
+  return store.getJSON("goals", []);
 }
 function saveGoals(goals) {
   store.set("goals", JSON.stringify(goals));
 }
 function loadBodyWeights() {
-  return JSON.parse(store.get("bodyWeights") || "{}");
+  return store.getJSON("bodyWeights", {});
 }
 function saveBodyWeights(data) {
   store.set("bodyWeights", JSON.stringify(data));
@@ -73,10 +73,11 @@ function goalProgress(goal, current) {
 function goalTitle(goal) {
   if (goal.type === "lift") {
     const move = MOVEMENTS[goal.movement];
-    return `🏋️ ${move.name[currentLang]} · ${EQUIPMENT[goal.equip][currentLang]} — ${goal.target} ${t("kg")}`;
+    if (!move || !EQUIPMENT[goal.equip]) return `🏋️ ? — ${esc(goal.target)} ${t("kg")}`; // exercise no longer exists
+    return `🏋️ ${move.name[currentLang]} · ${EQUIPMENT[goal.equip][currentLang]} — ${esc(goal.target)} ${t("kg")}`;
   }
-  if (goal.type === "bodyweight") return `⚖️ ${t("goalBodyweight")} — ${goal.target} ${t("kg")}`;
-  return `📅 ${goal.target} ${t("workoutsPerWeek")}`;
+  if (goal.type === "bodyweight") return `⚖️ ${t("goalBodyweight")} — ${esc(goal.target)} ${t("kg")}`;
+  return `📅 ${esc(goal.target)} ${t("workoutsPerWeek")}`;
 }
 
 // ----- Draw the goals list -----
@@ -99,8 +100,8 @@ function renderGoals() {
     }
 
     const detail = goal.type === "frequency"
-      ? `${current} / ${goal.target} ${t("inLast7Days")}`
-      : `${t("start")}: ${goal.start} → ${t("now")}: <b>${current}</b> → ${t("target")}: ${goal.target} ${t("kg")}`;
+      ? `${esc(current)} / ${esc(goal.target)} ${t("inLast7Days")}`
+      : `${t("start")}: ${esc(goal.start)} → ${t("now")}: <b>${esc(current)}</b> → ${t("target")}: ${esc(goal.target)} ${t("kg")}`;
 
     const card = document.createElement("div");
     card.className = "goal-card" + (done ? " done" : "");
