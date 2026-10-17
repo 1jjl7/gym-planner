@@ -176,6 +176,13 @@ function renderExerciseList(list, dayIndex, withLog = false) {
       ${withLog ? `<div class="set-panel"></div>` : ""}
     `;
 
+    // Workout finished and nothing logged for this exercise → show only its title (tap to open)
+    if (withLog && isTodayFinished() && !getSets(formatDateInput(todayDate()), logKey(slot.movement, slot.equip)).some((x) => x.done)) {
+      card.classList.add("collapsed");
+      card.insertAdjacentHTML("beforeend", `<button class="link-btn expand-btn">${t("notLogged")}</button>`);
+      card.querySelector(".expand-btn").addEventListener("click", () => card.classList.remove("collapsed"));
+    }
+
     if (withLog) {
       renderSetPanel(card.querySelector(".set-panel"), formatDateInput(todayDate()),
         { movement: slot.movement, equip: slot.equip, sets: slot.sets, reps: slot.reps },
@@ -296,6 +303,7 @@ function renderToday() {
   }
 
   renderExerciseList(document.getElementById("todayExercises"), dayIndex, true);
+  renderFinishBox();
 
   renderMonthSummary();
   document.getElementById("restSecondsInput").value = restSeconds();

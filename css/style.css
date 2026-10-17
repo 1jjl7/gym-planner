@@ -773,3 +773,50 @@ main { padding-bottom: 90px; }
 .add-box { display: grid; gap: 8px; background: var(--card); border: 1px dashed var(--accent); border-radius: var(--radius); padding: 12px; }
 .add-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .add-fields .primary-btn { margin-top: 0; }
+
+/* ===== Finish workout ===== */
+.finish-box { margin-top: 14px; }
+.finish-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--done);
+  color: #0f1115;
+  font: inherit;
+  font-weight: 800;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.finish-btn:hover { filter: brightness(1.08); }
+.finish-btn.danger { background: var(--accent); color: #fff; }
+.finish-done {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--done-soft);
+  color: var(--done);
+  border: 1px solid var(--done);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  font-size: 0.9rem;
+}
+.finish-done button {
+  margin-inline-start: auto;
+  background: none;
+  border: none;
+  color: var(--muted);
+  text-decoration: underline;
+  font: inherit;
+  cursor: pointer;
+}
+
+/* exercises left unlogged after finishing: title only */
+.exercise-card.collapsed { opacity: 0.6; }
+.exercise-card.collapsed .chips,
+.exercise-card.collapsed .card-actions,
+.exercise-card.collapsed .swap-list,
+.exercise-card.collapsed .set-panel,
+.exercise-card.collapsed .exercise-info p { display: none; }
+.exercise-card.collapsed .exercise-main img { width: 44px; height: 44px; }
+.exercise-card:not(.collapsed) .expand-btn { display: none; }

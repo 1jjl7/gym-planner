@@ -6,7 +6,7 @@
 //  - Libraries, fonts, exercise images:     CACHE FIRST   → they never change, so the cached copy is enough
 //  - YouTube videos are NOT cached (too big; they need internet)
 
-const VERSION = "v12"; // change this whenever the file list changes
+const VERSION = "v13"; // change this whenever the file list changes
 const APP_CACHE = "app-" + VERSION;
 const STATIC_CACHE = "static-v1"; // images / libraries / fonts — they never change, so this name stays fixed
 
@@ -35,6 +35,7 @@ const APP_FILES = [
   "js/records.js",
   "js/volume.js",
   "js/editor.js",
+  "js/finish.js",
   "js/app.js",
   "js/pwa.js",
   "icons/icon-192.png",

@@ -102,10 +102,14 @@ function renderSetPanel(container, dateKey, slot, dayInfo) {
     });
   }
 
-  const save = () => setSets(dateKey, key, sets, dayInfo);
+  const isToday = dateKey === formatDateInput(todayDate());
+  // save, and keep today's finish button / summary line in sync (weights, reps, ✓, added sets)
+  const save = () => {
+    setSets(dateKey, key, sets, dayInfo);
+    if (isToday) renderFinishBox();
+  };
   const usesPlates = barWeightFor(slot.equip) !== null; // barbell / EZ bar → show the plate line
   // warm-up box: only for today's big lifts (not when editing an old workout)
-  const isToday = dateKey === formatDateInput(todayDate());
   const showWarmup = isToday && needsWarmup(slot.movement, slot.equip);
   const warmupKey = key + "|" + container.closest(".exercise-card")?.dataset.slot;
   const doneCount = sets.filter((s) => s.done).length;
