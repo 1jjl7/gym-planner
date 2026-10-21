@@ -836,3 +836,22 @@ main { padding-bottom: 90px; }
   font-weight: 700;
   text-align: center;
 }
+
+/* ⏭ Skip an exercise for today */
+.skip-panel { margin-top: 10px; padding: 10px 12px; border: 1px dashed var(--border); border-radius: 10px; }
+.skip-panel p { margin: 0 0 8px; color: var(--muted); }
+.skip-panel .skip-forever { margin-top: 10px; color: var(--muted); font-size: 0.85rem; }
+.skipped-line { display: none; }
+.exercise-card.skipped { opacity: 0.6; }
+.exercise-card.skipped .chips,
+.exercise-card.skipped .card-actions,
+.exercise-card.skipped .swap-list,
+.exercise-card.skipped .skip-panel,
+.exercise-card.skipped .set-panel,
+.exercise-card.skipped .expand-btn,
+.exercise-card.skipped .exercise-info p { display: none; }
+.exercise-card.skipped .exercise-main img { width: 44px; height: 44px; }
+.exercise-card.skipped .skipped-line {
+  display: flex; justify-content: space-between; align-items: center; margin-top: 8px;
+  color: var(--muted); font-size: 0.9rem;
+}

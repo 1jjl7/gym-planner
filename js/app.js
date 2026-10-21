@@ -83,7 +83,9 @@ function slotKey(dayIndex, slotIndex) {
 // What the user will actually do in this slot: their saved choice, or the plan's default
 function resolveSlot(dayIndex, slotIndex) {
   const [movement, sets, reps, equip] = SPLITS[currentSplit].days[dayIndex].exercises[slotIndex];
-  const saved = slotChoices[slotKey(dayIndex, slotIndex)];
+  let saved = slotChoices[slotKey(dayIndex, slotIndex)];
+  // ignore a broken saved choice (unknown exercise / equipment) instead of crashing the page
+  if (saved && !MOVEMENTS[saved.movement]?.variants[saved.equip]) saved = null;
   return {
     original: movement,
     movement: saved ? saved.movement : movement,
@@ -171,13 +173,25 @@ function renderExerciseList(list, dayIndex, withLog = false) {
         <button class="link-btn detail-btn">ℹ️ ${t("technique")}</button>
         <button class="link-btn swap-btn">🔄 ${t("swap")}</button>
         ${slot.changed ? `<button class="link-btn reset-btn">↺ ${t("resetSlot")}</button>` : ""}
+        ${withLog ? `<button class="link-btn skip-btn">⏭ ${t("skip")}</button>` : ""}
       </div>
+      ${withLog ? `<div class="skip-panel" hidden>
+          <p class="small">${t("skipWhy")}</p>
+          <div class="chips">
+            <button class="chip skip-reason" data-reason="time">⏱️ ${t("skipTime")}</button>
+            <button class="chip skip-reason" data-reason="pain">🤕 ${t("skipPain")}</button>
+            <button class="chip skip-reason" data-reason="busy">🏋️ ${t("skipBusy")}</button>
+            <button class="chip skip-reason" data-reason="">${t("skipNoReason")}</button>
+          </div>
+          <button class="link-btn skip-forever">🗑 ${t("skipForever")}</button>
+        </div>
+        <div class="skipped-line"><span></span><button class="link-btn skip-undo">${t("undo")}</button></div>` : ""}
       ${swapList}
       ${withLog ? `<div class="set-panel"></div>` : ""}
     `;
 
     // Workout finished and nothing logged for this exercise → show only its title (tap to open)
-    if (withLog && isTodayFinished() && !getSets(formatDateInput(todayDate()), logKey(slot.movement, slot.equip)).some((x) => x.done)) {
+    if (withLog && isTodayFinished() && getSkip(formatDateInput(todayDate()), logKey(slot.movement, slot.equip)) === undefined && !getSets(formatDateInput(todayDate()), logKey(slot.movement, slot.equip)).some((x) => x.done)) {
       card.classList.add("collapsed");
       card.insertAdjacentHTML("beforeend", `<button class="link-btn expand-btn">${t("notLogged")}</button>`);
       card.querySelector(".expand-btn").addEventListener("click", () => card.classList.remove("collapsed"));
@@ -189,12 +203,40 @@ function renderExerciseList(list, dayIndex, withLog = false) {
         { split: currentSplit, dayIndex });
     }
 
+    // ⏭ Skip this exercise today (optional reason), or remove it from the plan for good
+    if (withLog) {
+      const today = formatDateInput(todayDate());
+      const exKey = logKey(slot.movement, slot.equip);
+      const panel = card.querySelector(".skip-panel");
+      const showSkipped = (reason) => {
+        card.querySelector(".skipped-line span").textContent = skipText(reason);
+        card.classList.add("skipped");
+        card.classList.remove("collapsed");
+      };
+      const savedReason = getSkip(today, exKey);
+      if (savedReason !== undefined) showSkipped(savedReason);
+
+      card.querySelector(".skip-btn").addEventListener("click", () => { panel.hidden = !panel.hidden; });
+      card.querySelectorAll(".skip-reason").forEach((btn) => btn.addEventListener("click", () => {
+        setSkip(today, exKey, btn.dataset.reason);
+        panel.hidden = true;
+        showSkipped(btn.dataset.reason);
+        renderFinishBox();
+      }));
+      card.querySelector(".skip-undo").addEventListener("click", () => {
+        setSkip(today, exKey, null);
+        card.classList.remove("skipped");
+        renderFinishBox();
+      });
+      confirmClick(card.querySelector(".skip-forever"), () => removeSlotForever(dayIndex, slotIndex));
+    }
+
     // Image, title or "technique" button → open the details window
     card.querySelectorAll(".exercise-main img, .exercise-main h4, .detail-btn").forEach((el) => {
       el.addEventListener("click", () => openExercise(slot.movement, slot.equip));
     });
     // Click on an equipment chip → keep the movement, change the equipment
-    card.querySelectorAll(".chip").forEach((chip) => {
+    card.querySelectorAll(".chip[data-equip]").forEach((chip) => { // equipment chips only (not the skip reasons)
       chip.addEventListener("click", () => {
         saveSlot(dayIndex, slotIndex, slot.movement, chip.dataset.equip);
         refreshAll();

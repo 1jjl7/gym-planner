@@ -104,6 +104,9 @@ function checkBackup(backup) {
     ok("workouts", checkWorkouts) &&
     ok("goals", checkGoals) &&
     ok("customSplits", checkCustomSplits) &&
+    ok("skips", (x) => isObj(x) && safeKeys(x) && Object.entries(x).every(([date, day]) =>
+      isDateKey(date) && isObj(day) && safeKeys(day) && Object.entries(day).every(([key, reason]) =>
+        isMoveEquip(...key.split(".")) && ["", "time", "pain", "busy"].includes(reason)))) &&
     ok("bodyWeights", (x) => isObj(x) && safeKeys(x) && Object.entries(x).every(([k, v]) => isDateKey(k) && isNum(v, LIMITS.bodyWeight.min, LIMITS.bodyWeight.max))) &&
     ok("slotChoices", (x) => isObj(x) && safeKeys(x) && Object.values(x).every((c) => isObj(c) && isMoveEquip(c.movement, c.equip))) &&
     ok("profile", (x) => isObj(x) && isNum(x.age, PROFILE_LIMITS.age.min, PROFILE_LIMITS.age.max) && isNum(x.height, PROFILE_LIMITS.height.min, PROFILE_LIMITS.height.max) && ["male", "female"].includes(x.sex)) &&

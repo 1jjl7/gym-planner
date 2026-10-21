@@ -19,6 +19,7 @@ function daySummary(dateKey) {
   let sets = 0;
   let volume = 0;
   let records = 0;
+  const skipped = Object.keys(loadSkips()[dateKey] || {}).length;
   for (const [key, list] of Object.entries(day.logs)) {
     const done = list.filter((s) => s.done);
     sets += done.length;
@@ -33,7 +34,7 @@ function daySummary(dateKey) {
       if (heavier || stronger) records++;
     }
   }
-  return { sets, volume: Math.round(volume), records };
+  return { sets, volume: Math.round(volume), records, skipped };
 }
 
 function finishWorkout() {
@@ -82,6 +83,7 @@ function renderFinishBox() {
       `<span dir="ltr">${s.volume.toLocaleString("en")}</span> ${t("kg")}`,
     ];
     if (s.records) parts.push(`🏆 ${t("finishedRecords").replace("{n}", s.records)}`);
+    if (s.skipped) parts.push(`⏭ ${t("finishedSkipped").replace("{n}", s.skipped)}`);
     box.innerHTML = `<div class="finish-done">
         <span>✅ ${parts.join(" · ")}</span>
         <button id="undoFinishBtn">${t("undo")}</button>

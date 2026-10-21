@@ -3,7 +3,8 @@
 // {
 //   "2026-10-13": {
 //     split: "ppl_ul", dayIndex: 0,
-//     logs: { "flat_press.dumbbell": [ { w: 25, r: 10, done: true }, ... ] }
+//     logs: { "flat_press.dumbbell": [ { w: 25, r: 10, done: true }, ... ] },
+//     finished: true   // optional: "Finish workout" was pressed
 //   },
 //   ...
 // }
@@ -67,6 +68,36 @@ function setSets(dateKey, key, sets, dayInfo) {
   const hasDone = Object.values(workouts[dateKey].logs).some((s) => s.some((x) => x.done));
   if (!hasDone) delete workouts[dateKey];
   saveWorkouts(workouts);
+}
+
+// ----- ⏭ Skipped exercises (for one day only) -----
+// Saved apart from "workouts" under "skips": { "2026-10-21": { "skull_crusher.ez_bar": "time" } }
+// so a day with only skipped exercises never counts as a workout day (heatmap, goals, history).
+const SKIP_REASONS = { time: "⏱️", pain: "🤕", busy: "🏋️" }; // "" = no reason given
+
+function loadSkips() {
+  return store.getJSON("skips", {});
+}
+
+// Reason saved for this exercise on this date, or undefined if it wasn't skipped
+function getSkip(dateKey, key) {
+  return loadSkips()[dateKey]?.[key];
+}
+
+// reason: "time" | "pain" | "busy" | ""   — or null to un-skip
+function setSkip(dateKey, key, reason) {
+  const skips = loadSkips();
+  skips[dateKey] = { ...skips[dateKey] };
+  if (reason === null) delete skips[dateKey][key];
+  else skips[dateKey][key] = reason;
+  if (Object.keys(skips[dateKey]).length === 0) delete skips[dateKey];
+  store.set("skips", JSON.stringify(skips));
+}
+
+// "⏭ Skipped · ⏱️ No time"
+function skipText(reason) {
+  const map = { time: "skipTime", pain: "skipPain", busy: "skipBusy" };
+  return "⏭ " + t("skipped") + (reason ? ` · ${SKIP_REASONS[reason]} ${t(map[reason])}` : "");
 }
 
 // The most recent date BEFORE dateKey where this exercise has finished sets
@@ -236,6 +267,7 @@ let editingDate = null; // date of the workout being edited in the Log tab
 function renderHistory() {
   const box = document.getElementById("historyList");
   const workouts = loadWorkouts();
+  const skips = loadSkips();
   const dates = Object.keys(workouts).sort().reverse();
 
   if (dates.length === 0) {
@@ -283,6 +315,14 @@ function renderHistory() {
       }
       body.appendChild(row);
     });
+    // exercises skipped that day (⏭ + reason)
+    for (const [key, reason] of Object.entries(skips[dateKey] || {})) {
+      const [movement, equip] = key.split(".");
+      const row = document.createElement("div");
+      row.className = "history-ex muted";
+      row.innerHTML = `<div class="history-ex-name">${MOVEMENTS[movement]?.name[currentLang] ?? esc(movement)}</div><div>${skipText(reason)}</div>`;
+      body.appendChild(row);
+    }
 
     card.querySelector(".edit-btn").addEventListener("click", () => {
       editingDate = editingDate === dateKey ? null : dateKey;

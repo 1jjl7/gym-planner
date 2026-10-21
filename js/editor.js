@@ -64,6 +64,19 @@ function startEditing() {
   refreshAll();
 }
 
+// "⏭ Skip → remove from my plan for good" (from the Today tab). A built-in plan is copied first,
+// exactly like the editor does, so the built-in plans never change.
+function removeSlotForever(dayIndex, slotIndex) {
+  if (!isCustomSplit(currentSplit)) {
+    currentSplit = copyToCustom(currentSplit);
+    store.set("split", currentSplit);
+  }
+  bakeChoices(currentSplit);
+  SPLITS[currentSplit].days[dayIndex].exercises.splice(slotIndex, 1);
+  saveCustomSplits();
+  refreshAll();
+}
+
 function stopEditing() {
   editMode = false;
   refreshAll();
