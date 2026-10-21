@@ -314,6 +314,10 @@ main { max-width: 900px; margin: 0 auto; padding: 20px 16px; }
 }
 .today-hero h2 { font-size: 2rem; margin: 2px 0; color: var(--accent); }
 #weekAhead .day-box { cursor: default; }
+#weekAhead .day-box.pickable { cursor: pointer; }
+#weekAhead .day-box.pickable:hover { border-color: var(--muted); }
+#weekAhead .day-box.armed { border-color: var(--accent); background: var(--accent-soft); opacity: 1; }
+#weekAhead .day-box.armed b { font-size: 0.8rem; }
 
 .schedule-settings {
   margin-top: 24px;

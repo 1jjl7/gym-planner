@@ -125,3 +125,13 @@ Done locally: 1) `esc()` on every user / backup text in innerHTML, 2) field-by-f
 **Next (reminder for Ahmed): 6) automated tests** for pure functions (checkBackup, estimated1RM, plates,
 warm-up) — then the medium items: one in-memory cache instead of 22× loadWorkouts(), schema version,
 ES modules, generated APP_FILES list, aria labels / tab roles.
+
+### H. Ready-made plans from well-known coaches (idea from Ahmed's friend, 2026-10-17)
+- Let the user pick a famous coach's program (e.g. "جانتي" — Ahmed's friend's example — and others) next to
+  the built-in splits. Related to backlog #17 (ready-made programs).
+- Fits the existing data model: each program = one entry in data/splits.js (7-day cycle, exercises,
+  sets × reps); swaps / equipment / editor already work on it.
+- Check before adding any: only use programs the coach published **for free** (not paid PDFs / apps),
+  describe them in our own words, link to the original source, and don't use their name or logo in a way
+  that looks like an endorsement ("based on X's free program"). Verify each program from the coach's own page.
+- Exercises not in data/exercises.js would need adding first.

@@ -299,6 +299,13 @@ function renderToday() {
     box.innerHTML = `<small>${i === 0 ? t("todayWord") : formatDate(date, { weekday: "short" })}</small>
                      <b>${esc(d.title[currentLang])}</b>
                      <small>${formatDate(date, { day: "numeric", month: "numeric" })}</small>`;
+    // A coming day can become today (tap twice): e.g. you trained yesterday but logged it today
+    if (i > 0) {
+      box.classList.add("pickable");
+      box.setAttribute("role", "button");
+      box.tabIndex = 0;
+      box.addEventListener("click", () => pickDayAsToday(box, cycleDayFor(date)));
+    }
     week.appendChild(box);
   }
 
@@ -308,6 +315,48 @@ function renderToday() {
   renderMonthSummary();
   document.getElementById("restSecondsInput").value = restSeconds();
   document.getElementById("barWeightInput").value = barWeightFor("barbell");
+}
+
+// 1st tap: "Make it today?"  2nd tap (within 3 s): today becomes that day of the cycle.
+// If today already has a logged workout and yesterday is empty, that workout moves to yesterday
+// (you trained yesterday and logged it late). Never overwrites a workout already saved for yesterday.
+function pickDayAsToday(box, targetIndex) {
+  if (!box.classList.contains("armed")) {
+    document.querySelectorAll("#weekAhead .armed").forEach((b) => b.classList.remove("armed"));
+    box.classList.add("armed");
+    box.dataset.label = box.querySelector("b").textContent;
+    box.querySelector("b").textContent = t("makeToday");
+    setTimeout(() => {
+      if (!box.isConnected || !box.classList.contains("armed")) return;
+      box.classList.remove("armed");
+      box.querySelector("b").textContent = box.dataset.label;
+    }, 3000);
+    return;
+  }
+
+  const today = todayDate();
+  const message = document.getElementById("weekMessage");
+  message.textContent = "";
+  const todayKey = formatDateInput(today);
+  const yesterdayKey = formatDateInput(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1));
+  const workouts = loadWorkouts();
+  if (workouts[todayKey]) {
+    if (workouts[yesterdayKey]) {
+      message.textContent = "⚠️ " + t("yesterdayTaken"); // keep both as they are
+    } else {
+      workouts[yesterdayKey] = workouts[todayKey];
+      delete workouts[todayKey];
+      saveWorkouts(workouts);
+      message.textContent = "✅ " + t("movedToYesterday");
+    }
+  }
+
+  // move the start date so that cycleDayFor(today) === targetIndex
+  const length = SPLITS[currentSplit].days.length;
+  const shift = (targetIndex - cycleDayFor(today) + length) % length;
+  const start = parseDate(startDate);
+  setStartDate(formatDateInput(new Date(start.getFullYear(), start.getMonth(), start.getDate() - shift)));
+  renderHistory();
 }
 
 function setStartDate(text) {
