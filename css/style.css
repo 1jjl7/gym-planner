@@ -855,3 +855,33 @@ main { padding-bottom: 90px; }
   display: flex; justify-content: space-between; align-items: center; margin-top: 8px;
   color: var(--muted); font-size: 0.9rem;
 }
+
+/* ===== Me page (preview) ===== */
+.me-hero { display: flex; align-items: center; gap: 14px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 14px; }
+.me-avatar { position: relative; width: 72px; height: 72px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; font-size: 2rem; font-weight: 800; flex-shrink: 0; }
+.me-avatar-edit { position: absolute; bottom: -2px; inset-inline-end: -2px; background: var(--card); border: 1px solid var(--border); border-radius: 50%; width: 26px; height: 26px; display: grid; place-items: center; font-size: 0.8rem; }
+.me-hello { margin: 0; }
+.me-note { border: 1px dashed var(--border); border-radius: 10px; padding: 10px; }
+.me-add { width: 100%; margin: 8px 0 14px; }
+.me-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.me-photo { display: flex; flex-direction: column; gap: 4px; text-align: center; }
+.me-ph { aspect-ratio: 3 / 4; background: #252a34; border-radius: 10px; display: grid; place-items: center; color: var(--muted); }
+.me-diff { text-align: center; font-size: 1.05rem; margin: 10px 0 0; }
+.me-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.me-thumb { display: flex; flex-direction: column; gap: 4px; text-align: center; color: var(--muted); }
+.me-corner { width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--accent); background: var(--accent-soft); color: var(--accent); font: inherit; font-weight: 800; cursor: pointer; }
+.me-corner { display: grid; place-items: center; padding: 0; overflow: hidden; }
+.me-corner img, .me-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.me-avatar { cursor: pointer; }
+/* progress photos */
+.me-add { display: block; text-align: center; cursor: pointer; }
+.me-compare.single { grid-template-columns: 1fr; max-width: 60%; margin: 0 auto; }
+.me-photo img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 10px; background: #252a34; }
+.me-thumb img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 8px; cursor: pointer; border: 2px solid transparent; }
+.me-thumb.picked img { border-color: var(--accent); }
+.me-thumb .photo-delete { padding: 0; }
+/* monthly photo reminder (Today tab) */
+.photo-nudge { display: flex; align-items: center; gap: 8px; margin-top: 10px; background: var(--accent-soft); border: 1px solid var(--accent); border-radius: var(--radius); padding: 10px 12px; }
+.photo-nudge-open { flex: 1; background: none; border: none; color: var(--text); font: inherit; text-align: start; cursor: pointer; }
+.photo-nudge-hide { color: var(--muted); }
+.photo-backup { margin-top: 14px; }

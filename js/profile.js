@@ -69,7 +69,9 @@ function goalPaceTips(weight) {
 }
 
 // ----- Draw the profile form + advice -----
+// Lives on the "Me" page (moved there from the Goals tab).
 function renderProfile() {
+  if (typeof renderMe === "function") renderMe(); // the info line under "Hi Ahmed"
   const p = loadProfile();
   const weight = latestBodyWeight();
   if (p && document.activeElement?.closest("#profileForm") == null) {

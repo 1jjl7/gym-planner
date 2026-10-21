@@ -355,6 +355,7 @@ function renderToday() {
   renderFinishBox();
 
   renderMonthSummary();
+  if (typeof renderPhotoNudge === "function") renderPhotoNudge(); // defined in photos.js
   document.getElementById("restSecondsInput").value = restSeconds();
   document.getElementById("barWeightInput").value = barWeightFor("barbell");
 }
@@ -429,6 +430,7 @@ function refreshAll() {
   fillGoalExerciseOptions(); // drop-down names follow the language
   updateGoalForm();
   renderGoals();
+  if (typeof renderMe === "function") renderMe(); // defined in me.js
   if (document.getElementById("progress").classList.contains("active")) renderProgress();
 }
 

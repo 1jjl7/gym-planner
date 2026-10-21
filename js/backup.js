@@ -112,8 +112,11 @@ function checkBackup(backup) {
     ok("profile", (x) => isObj(x) && isNum(x.age, PROFILE_LIMITS.age.min, PROFILE_LIMITS.age.max) && isNum(x.height, PROFILE_LIMITS.height.min, PROFILE_LIMITS.height.max) && ["male", "female"].includes(x.sex)) &&
     ok("split", (x) => typeof x === "string" && (BUILT_IN_SPLITS.includes(x) || customIds.includes(x))) &&
     ok("lang", (x) => x === "ar" || x === "en") &&
+    ok("name", (x) => isText(x, 30)) &&
+    ok("avatar", (x) => typeof x === "string" && x.length < 200000 && /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(x)) &&
     ok("startDate", isDateKey) &&
     ok("trackingFrom", isDateKey) &&
+    ok("photoNudgeHidden", isDateKey) &&
     ok("restSeconds", (x) => isInt(Number(x), REST_LIMITS.min, REST_LIMITS.max)) &&
     ok("barWeight", (x) => BAR_CHOICES.includes(Number(x)));
   return valid ? null : "restoreBroken";

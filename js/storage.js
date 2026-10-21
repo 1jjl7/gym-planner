@@ -17,7 +17,7 @@ function esc(value) {
 // All keys the app uses (backup.js also reads this list)
 const STORE_KEYS = [
   "workouts", "slotChoices", "goals", "bodyWeights", "profile", "split", "startDate",
-  "lang", "trackingFrom", "restSeconds", "barWeight", "customSplits", "skips",
+  "lang", "trackingFrom", "restSeconds", "barWeight", "customSplits", "skips", "name", "avatar", "photoNudgeHidden",
 ];
 
 const store = {
